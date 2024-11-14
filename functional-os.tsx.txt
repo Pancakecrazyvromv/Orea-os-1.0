@@ -1,0 +1,201 @@
+import { useState, useEffect } from 'react';
+import { Settings, FileText, Monitor, Cloud, Gamepad2, Lock } from 'lucide-react';
+
+// File System functionality
+const FileSystem = () => {
+  const [files, setFiles] = useState([]);
+  const [currentPath, setCurrentPath] = useState('/');
+
+  const createFile = (name, content) => {
+    setFiles([...files, { name, content, path: currentPath, created: new Date() }]);
+  };
+
+  return (
+    <div className="p-4 bg-white rounded-lg shadow">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold">File System</h2>
+        <button className="px-4 py-2 bg-blue-500 text-white rounded" onClick={() => createFile('new-file.txt', '')}>
+          New File
+        </button>
+      </div>
+      <div className="grid grid-cols-4 gap-4">
+        {files.filter(f => f.path === currentPath).map((file, i) => (
+          <div key={i} className="p-3 border rounded hover:bg-gray-50 cursor-pointer">
+            <FileText className="w-8 h-8 mb-2" />
+            <p className="text-sm truncate">{file.name}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// Weather Widget with API integration
+const WeatherWidget = () => {
+  const [weather, setWeather] = useState(null);
+
+  useEffect(() => {
+    // Simulated weather data
+    setWeather({
+      temp: 72,
+      condition: 'Sunny',
+      humidity: 45
+    });
+  }, []);
+
+  return (
+    <div className="p-4 bg-white rounded-lg shadow">
+      <div className="flex items-center mb-4">
+        <Cloud className="w-6 h-6 mr-2" />
+        <h2 className="text-xl font-bold">Weather</h2>
+      </div>
+      {weather && (
+        <div className="space-y-2">
+          <p>Temperature: {weather.temp}°F</p>
+          <p>Condition: {weather.condition}</p>
+          <p>Humidity: {weather.humidity}%</p>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Games Section
+const Games = () => {
+  const games = [
+    { name: 'Chess', icon: '♟️' },
+    { name: 'Two Dots', icon: '••' },
+    { name: 'Monopoly', icon: '🎲' },
+    { name: 'Side Show', icon: '🎪' }
+  ];
+
+  return (
+    <div className="p-4 bg-white rounded-lg shadow">
+      <div className="flex items-center mb-4">
+        <Gamepad2 className="w-6 h-6 mr-2" />
+        <h2 className="text-xl font-bold">Games</h2>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        {games.map((game, i) => (
+          <div key={i} className="p-4 border rounded text-center hover:bg-gray-50 cursor-pointer">
+            <div className="text-2xl mb-2">{game.icon}</div>
+            <p>{game.name}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// Admin Panel
+const AdminPanel = () => {
+  const [systemStats, setSystemStats] = useState({
+    cpu: 25,
+    memory: 4.2,
+    storage: 234
+  });
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSystemStats(prev => ({
+        cpu: Math.floor(Math.random() * 100),
+        memory: +(Math.random() * 8).toFixed(1),
+        storage: prev.storage
+      }));
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="p-4 bg-white rounded-lg shadow">
+      <div className="flex items-center mb-4">
+        <Lock className="w-6 h-6 mr-2" />
+        <h2 className="text-xl font-bold">Admin Panel</h2>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="p-4 border rounded">
+          <h3 className="font-bold mb-2">System Status</h3>
+          <p>CPU: {systemStats.cpu}%</p>
+          <p>Memory: {systemStats.memory}GB/8GB</p>
+          <p>Storage: {systemStats.storage}GB free</p>
+        </div>
+        <div className="p-4 border rounded">
+          <h3 className="font-bold mb-2">User Management</h3>
+          <p>Active Users: 3</p>
+          <p>Last Backup: 2h ago</p>
+        </div>
+        <div className="p-4 border rounded">
+          <h3 className="font-bold mb-2">Security</h3>
+          <p>Firewall: Active</p>
+          <p>Last Update: Today</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Main OS Component
+const OS = () => {
+  const [activeWindow, setActiveWindow] = useState(null);
+  const [time, setTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const windows = {
+    files: <FileSystem />,
+    weather: <WeatherWidget />,
+    games: <Games />,
+    admin: <AdminPanel />
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-100">
+      {/* Taskbar */}
+      <div className="bg-blue-600 text-white p-2 flex justify-between items-center">
+        <button className="px-4 py-1 bg-blue-700 rounded" onClick={() => setActiveWindow(null)}>
+          Start
+        </button>
+        <div>{time.toLocaleTimeString()}</div>
+      </div>
+
+      {/* Desktop */}
+      <div className="p-4 grid grid-cols-6 md:grid-cols-8 gap-4">
+        {Object.entries(windows).map(([key, _]) => (
+          <div
+            key={key}
+            className="flex flex-col items-center p-2 cursor-pointer hover:bg-white/50 rounded"
+            onClick={() => setActiveWindow(key)}
+          >
+            <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center text-white mb-1">
+              {key === 'files' && <FileText />}
+              {key === 'weather' && <Cloud />}
+              {key === 'games' && <Gamepad2 />}
+              {key === 'admin' && <Lock />}
+            </div>
+            <span className="text-sm capitalize">{key}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Active Window */}
+      {activeWindow && (
+        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-4xl">
+          {windows[activeWindow]}
+        </div>
+      )}
+
+      {/* Status Bar */}
+      <div className="fixed bottom-0 w-full bg-gray-200 p-2 flex justify-between text-sm">
+        <span>System Status: Online</span>
+        <span>Memory Usage: 45%</span>
+        <span>CPU: 25%</span>
+      </div>
+    </div>
+  );
+};
+
+export default OS;
